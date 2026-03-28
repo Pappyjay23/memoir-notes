@@ -6,8 +6,13 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
 
+app.use(express.json());
+
 app.get("/", (req: Request, res: Response) => {
-	res.send("Welcome to memoir-notes!");
+	res.json({
+		message: "Welcome to memoir-notes!",
+		status: "success",
+	});
 });
 
 app.listen(PORT, () => {
