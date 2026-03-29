@@ -1,5 +1,7 @@
-import express, { type Request, type Response } from "express";
 import dotenv from "dotenv";
+import express from "express";
+import { connectDB } from "./config/db.config.js";
+import noteRouter from "./routes/note.routes.js";
 
 dotenv.config();
 
@@ -8,13 +10,10 @@ const PORT = process.env.PORT || 5001;
 
 app.use(express.json());
 
-app.get("/", (req: Request, res: Response) => {
-	res.json({
-		message: "Welcome to memoir-notes!",
-		status: "success",
-	});
-});
+app.use("/api/notes", noteRouter);
 
-app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`);
+connectDB().then(() => {
+	app.listen(PORT, () => {
+		console.log(`Server running on port ${PORT}`);
+	});
 });
