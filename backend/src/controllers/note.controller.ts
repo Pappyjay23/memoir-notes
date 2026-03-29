@@ -1,14 +1,19 @@
 import type { Request, Response } from "express";
-import { sendResponse } from "../utils/response.utils.js";
+import z from "zod";
 import Note from "../models/note.model.js";
+import {
+	sendErrorResponse,
+	sendSuccessResponse,
+} from "../utils/response.utils.js";
+import { noteSchema, updateNoteSchema } from "../schemas/note.schema.js";
 
 export const getNotes = async (req: Request, res: Response) => {
 	try {
 		const notes = await Note.find();
 
-		sendResponse(res, 200, "Notes fetched successfully", notes);
+		sendSuccessResponse(res, 200, "Notes fetched successfully", notes);
 	} catch (error) {
-		sendResponse(res, 500, "Error fetching notes");
+		sendErrorResponse(res, 500, "Error fetching notes");
 	}
 };
 
@@ -19,22 +24,34 @@ export const getNote = async (req: Request, res: Response) => {
 		const note = await Note.findById(id);
 
 		if (!note) {
-			return sendResponse(res, 404, "Note not found");
+			return sendErrorResponse(res, 404, "Note not found");
 		}
 
-		sendResponse(res, 200, "Note fetched successfully", note);
+		sendSuccessResponse(res, 200, "Note fetched successfully", note);
 	} catch (error) {
-		sendResponse(res, 500, "Error fetching notes");
+		sendErrorResponse(res, 500, "Error fetching notes");
 	}
 };
 
 export const createNote = async (req: Request, res: Response) => {
 	try {
-		const note = await Note.create(req.body);
+		const validatedData = noteSchema.parse(req.body);
 
-		sendResponse(res, 201, "Note created successfully", note);
-	} catch (error) {
-		sendResponse(res, 500, "Error creating notes");
+		const note = await Note.create({
+			...validatedData,
+			tag: validatedData.tag ?? "",
+		});
+
+		sendSuccessResponse(res, 201, "Note created successfully", note);
+	} catch (error: any) {
+		if (error instanceof z.ZodError) {
+			const errors = error.issues.map((issue) => ({
+				message: issue.message,
+			}));
+			return sendErrorResponse(res, 400, "Note validation failed", errors);
+		}
+
+		sendErrorResponse(res, 500, "Error creating notes");
 	}
 };
 
@@ -42,15 +59,27 @@ export const updateNote = async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 
-		const note = await Note.findByIdAndUpdate(id, req.body, { new: true });
+		const validatedData = updateNoteSchema.parse(req.body);
+
+		const note = await Note.findByIdAndUpdate(id, validatedData, {
+			new: true,
+			runValidators: true,
+		});
 
 		if (!note) {
-			return sendResponse(res, 404, "Note not found");
+			return sendErrorResponse(res, 404, "Note not found");
 		}
 
-		sendResponse(res, 200, "Note fetched successfully", note);
+		sendSuccessResponse(res, 200, "Note fetched successfully", note);
 	} catch (error) {
-		sendResponse(res, 500, "Error fetching notes");
+		if (error instanceof z.ZodError) {
+			const errors = error.issues.map((issue) => ({
+				message: issue.message,
+			}));
+			return sendErrorResponse(res, 400, "Note validation failed", errors);
+		}
+
+		sendErrorResponse(res, 500, "Error fetching notes");
 	}
 };
 
@@ -61,11 +90,11 @@ export const deleteNote = async (req: Request, res: Response) => {
 		const note = await Note.findByIdAndDelete(id);
 
 		if (!note) {
-			return sendResponse(res, 404, "Note not found");
+			return sendErrorResponse(res, 404, "Note not found");
 		}
 
-		sendResponse(res, 200, "Note deleted successfully", note);
+		sendSuccessResponse(res, 200, "Note deleted successfully", note);
 	} catch (error) {
-		sendResponse(res, 500, "Error fetching notes");
+		sendErrorResponse(res, 500, "Error fetching notes");
 	}
 };

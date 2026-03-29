@@ -14,7 +14,6 @@ const noteSchema = new Schema(
 		},
 		tag: {
 			type: String,
-			required: true,
 		},
 		pinned: {
 			type: Boolean,
