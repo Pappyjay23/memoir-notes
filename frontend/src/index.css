@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-	--background: #D5D7E4;
+	--background: #d5d7e4;
 	--foreground: #000;
 	--font-google-sans: "Google Sans", sans-serif;
 	--font-cookie: "Cookie", cursive;
