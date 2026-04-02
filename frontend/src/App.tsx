@@ -1,9 +1,9 @@
-import { Routes } from "react-router-dom";
-import { routeConfig } from "@/config/routes";
 import { mapRoutes } from "@/utils/routeMapper";
+import { Routes } from "react-router-dom";
+import {  routes } from "@/routes";
 
 const App = () => {
-	return <Routes>{mapRoutes(routeConfig)}</Routes>;
+	return <Routes>{mapRoutes(routes)}</Routes>;
 };
 
 export default App;

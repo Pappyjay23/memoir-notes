@@ -1,8 +1,7 @@
-// utils/routeMapper.tsx
 import { Route } from "react-router-dom";
 import { PrivateRoute } from "@/components/PrivateRoute";
 import { PublicRoute } from "@/components/PublicRoute";
-import type { RouteConfig } from "@/config/routes";
+import type { RouteConfig } from "@/routes";
 
 export const mapRoutes = (routes: RouteConfig[]) => {
 	return routes.map((route) => {

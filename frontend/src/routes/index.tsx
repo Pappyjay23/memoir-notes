@@ -3,6 +3,8 @@ import { ErrorPage } from "@/pages/error/ErrorPage";
 import LandingPage from "@/pages/landing/LandingPage";
 import LoginPage from "@/pages/auth/LoginPage";
 import SignupPage from "@/pages/auth/SignupPage";
+import AppLayout from "@/components/AppLayout";
+import SingleNotePage from "@/pages/home/SingleNotePage";
 
 export type RouteConfig = {
 	path: string;
@@ -11,7 +13,7 @@ export type RouteConfig = {
 	label?: string;
 };
 
-export const routeConfig: RouteConfig[] = [
+export const routes: RouteConfig[] = [
 	// Public Routes
 	{
 		path: "/landing",
@@ -35,9 +37,23 @@ export const routeConfig: RouteConfig[] = [
 	// Protected Routes
 	{
 		path: "/",
-		element: <HomePage />,
+		element: (
+			<AppLayout>
+				<HomePage />
+			</AppLayout>
+		),
 		isPrivate: true,
 		label: "Home",
+	},
+	{
+		path: "/note/:id",
+		element: (
+			<AppLayout>
+				<SingleNotePage />
+			</AppLayout>
+		),
+		isPrivate: true,
+		label: "Single Note",
 	},
 
 	// Error Route

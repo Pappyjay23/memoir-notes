@@ -40,6 +40,7 @@ export const createNote = async (req: Request, res: Response) => {
 		const note = await Note.create({
 			...validatedData,
 			tag: validatedData.tag ?? "",
+			pinned: validatedData.pinned ?? false,
 		});
 
 		sendSuccessResponse(res, 201, "Note created successfully", note);
@@ -62,7 +63,7 @@ export const updateNote = async (req: Request, res: Response) => {
 		const validatedData = updateNoteSchema.parse(req.body);
 
 		const note = await Note.findByIdAndUpdate(id, validatedData, {
-			new: true,
+			returnDocument: "after",
 			runValidators: true,
 		});
 

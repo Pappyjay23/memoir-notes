@@ -3,6 +3,7 @@
 :root {
 	--background: #d5d7e4;
 	--foreground: #000;
+	--primary: #1e2131;
 	--font-google-sans: "Google Sans", sans-serif;
 	--font-cookie: "Cookie", cursive;
 }
@@ -10,6 +11,7 @@
 @theme inline {
 	--color-background: var(--background);
 	--color-foreground: var(--foreground);
+	--color-primary: var(--primary);
 	--font-google-sans: var(--font-google-sans);
 	--font-cookie: var(--font-cookie);
 }
@@ -26,4 +28,27 @@ body {
 	overscroll-behavior: none;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar {
+	width: 5px;
+	height: 8px;
+}
+
+::-webkit-scrollbar-track {
+	background: var(--background);
+	border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--color-primary);
+	border-radius: 10px;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+	display: none;
+}
+.no-scrollbar {
+	-ms-overflow-style: none;
+	scrollbar-width: none;
 }

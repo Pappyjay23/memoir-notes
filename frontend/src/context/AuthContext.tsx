@@ -1,4 +1,3 @@
-// context/AuthContext.tsx
 import { createContext, useContext, useState, useEffect } from "react";
 
 type AuthContextType = {
@@ -15,7 +14,7 @@ export const AuthContextProvider = ({
 }: {
     children: React.ReactNode;
 }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isAuthenticated, setIsAuthenticated] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
 
     // Check auth on mount (placeholder for token check)
@@ -26,7 +25,7 @@ export const AuthContextProvider = ({
                 // const token = localStorage.getItem("authToken");
                 // const isValid = await verifyToken(token);
                 // setIsAuthenticated(isValid);
-                setIsAuthenticated(false);
+                // setIsAuthenticated(false);
             } finally {
                 setIsLoading(false);
             }
