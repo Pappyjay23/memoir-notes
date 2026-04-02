@@ -81,7 +81,7 @@ export const NoteContextProvider = ({
 			try {
 				setIsNoteLoading(true);
 				const response = await fetchNotes();
-				setNotes(response.data);
+				setNotes(() => sortNotes(response.data));
 				setIsNoteLoading(false);
 			} catch {
 				toast.error("Failed to load notes. Please refresh the page.");
