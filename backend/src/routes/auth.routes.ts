@@ -5,8 +5,12 @@ import {
     refresh,
     signup,
 } from "../controllers/auth.controller.js";
+import rateLimiter from "../middlewares/rateLimiter.middleware.js";
+import { authRatelimit } from "../config/upstash.config.js";
 
 const router = express.Router();
+
+router.use(rateLimiter(authRatelimit));
 
 router.post("/signup", signup);
 router.post("/login", login);

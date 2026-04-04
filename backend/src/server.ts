@@ -9,7 +9,7 @@ import express, {
 import { connectDB } from "./config/db.config.js";
 import authRouter from "./routes/auth.routes.js";
 import noteRouter from "./routes/note.routes.js";
-import userRouter from './routes/user.routes.js';
+import userRouter from "./routes/user.routes.js";
 
 dotenv.config();
 
@@ -34,16 +34,6 @@ app.use(
 	}),
 );
 
-app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
-	if (err.message === "Not allowed by CORS") {
-		return res.status(403).json({
-			success: false,
-			message: "Origin not allowed",
-		});
-	}
-	next(err);
-});
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -51,6 +41,22 @@ app.use(cookieParser());
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/notes", noteRouter);
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+	if (err.message === "Not allowed by CORS") {
+		return res.status(403).json({
+			success: false,
+			message: "Origin not allowed",
+		});
+	}
+
+	console.error(err.stack);
+
+	res.status(500).json({
+		success: false,
+		message: "Internal server error",
+	});
+});
 
 connectDB()
 	.then(() => {
