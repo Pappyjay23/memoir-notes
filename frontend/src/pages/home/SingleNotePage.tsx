@@ -3,7 +3,7 @@ import DeleteConfirmModal from "@/components/shared/DeleteConfirmModal";
 import NoteModal from "@/components/shared/NoteModal";
 import Button from "@/components/ui/Button";
 import { UseNote, type Note } from "@/context/NoteContext";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { MdPushPin } from "react-icons/md";
 import { useNavigate, useParams } from "react-router-dom";
@@ -16,19 +16,19 @@ const SingleNotePage = () => {
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
-	const { handleDeleteNote, handleUpdateNote } = UseNote();
+	const { notes, handleDeleteNote, handleUpdateNote } = UseNote();
 
-	const loadNote = async () => {
+	const loadNote = useCallback(async () => {
 		try {
 			setIsLoading(true);
-			const response = await fetchSingleNote(id!);
-			setNote(response.data);
+			const singleNote = await fetchSingleNote(id!);
+			setNote(singleNote);
 		} catch (error) {
 			console.error("Failed to fetch note:", error);
 		} finally {
 			setIsLoading(false);
 		}
-	};
+	}, [id]);
 
 	const handleEdit = () => {
 		setIsModalOpen(true);
@@ -40,9 +40,13 @@ const SingleNotePage = () => {
 
 	const handleSave = (noteData: Note) => {
 		if (note?._id) {
-			handleUpdateNote(note?._id, noteData).then(() => {
-				loadNote();
-			});
+			setNote((prev) =>
+				prev
+					? { ...prev, ...noteData, updatedAt: new Date().toISOString() }
+					: noteData,
+			);
+
+			handleUpdateNote(note._id, noteData);
 			setIsModalOpen(false);
 		}
 	};
@@ -69,7 +73,15 @@ const SingleNotePage = () => {
 		if (id) {
 			loadNote();
 		}
-	}, [id, navigate]);
+	}, [id, loadNote]);
+
+	useEffect(() => {
+		if (!id) return;
+		const fromContext = notes.find((n) => n._id === id);
+		if (fromContext) {
+			setNote(fromContext);
+		}
+	}, [id, notes]);
 
 	if (isLoading) {
 		return (

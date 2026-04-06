@@ -1,11 +1,67 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 import Button from "@/components/ui/Button";
 import Logo from "@/assets/images/logo.png";
 import { UserAuth } from "@/context/AuthContext";
 import Input from "@/components/ui/Input";
+import { signupSchema } from "@/schemas/authSchema";
+import type { SignupFormData } from "@/schemas/authSchema";
+
+type FieldErrors = {
+	firstName?: string;
+	lastName?: string;
+	email?: string;
+	password?: string;
+};
 
 const SignupPage = () => {
-	const { setIsAuthenticated } = UserAuth();
+	const { signup } = UserAuth();
+	const [formData, setFormData] = useState<SignupFormData>({
+		firstName: "",
+		lastName: "",
+		email: "",
+		password: "",
+	});
+	const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
+	const [isLoading, setIsLoading] = useState(false);
+
+	const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		setFormData({ ...formData, [e.target.name]: e.target.value });
+		if (fieldErrors[e.target.name as keyof FieldErrors]) {
+			setFieldErrors((prev) => ({
+				...prev,
+				[e.target.name]: undefined,
+			}));
+		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		try {
+			const validatedData = signupSchema.parse(formData);
+			setFieldErrors({});
+			setIsLoading(true);
+			await signup(
+				validatedData.firstName,
+				validatedData.lastName,
+				validatedData.email,
+				validatedData.password,
+			);
+		} catch (error: any) {
+			if (error.name === "ZodError") {
+				const errors: FieldErrors = {};
+				error.issues.forEach((err: any) => {
+					const key = err.path[0] as keyof FieldErrors;
+					if (key) errors[key] = err.message;
+				});
+				setFieldErrors(errors);
+			} else {
+				// Error already handled in context
+			}
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	return (
 		<div className='min-h-screen flex flex-col justify-center items-center px-4'>
@@ -19,18 +75,69 @@ const SignupPage = () => {
 				<h3 className='text-3xl md:text-4xl font-bold tracking-tighter mb-2 text-center'>
 					Let's Get Started.
 				</h3>
-				<form className='flex flex-col w-full mt-8 gap-4'>
-					<Input type='text' placeholder='First name' />
-					<Input type='text' placeholder='Last name' />
-					<Input type='email' placeholder='Email' />
-					<Input type='password' placeholder='Password' />
+				<form
+					className='flex flex-col w-full mt-8 gap-4'
+					onSubmit={handleSubmit}>
+					<div className='flex flex-col space-y-2'>
+						<Input
+							type='text'
+							name='firstName'
+							placeholder='First name'
+							value={formData.firstName}
+							onChange={handleChange}
+						/>
+						{fieldErrors.firstName && (
+							<p className='text-xs text-red-500 font-medium'>
+								{fieldErrors.firstName}
+							</p>
+						)}
+					</div>
+					<div className='flex flex-col space-y-2'>
+						<Input
+							type='text'
+							name='lastName'
+							placeholder='Last name'
+							value={formData.lastName}
+							onChange={handleChange}
+						/>
+						{fieldErrors.lastName && (
+							<p className='text-xs text-red-500 font-medium'>
+								{fieldErrors.lastName}
+							</p>
+						)}
+					</div>
+					<div className='flex flex-col space-y-2'>
+						<Input
+							type='text'
+							name='email'
+							placeholder='Email'
+							value={formData.email}
+							onChange={handleChange}
+						/>
+						{fieldErrors.email && (
+							<p className='text-xs text-red-500 font-medium'>
+								{fieldErrors.email}
+							</p>
+						)}
+					</div>
+					<div className='flex flex-col space-y-2'>
+						<Input
+							type='password'
+							name='password'
+							placeholder='Password'
+							value={formData.password}
+							onChange={handleChange}
+						/>
+						{fieldErrors.password && (
+							<p className='text-xs text-red-500 font-medium'>
+								{fieldErrors.password}
+							</p>
+						)}
+					</div>
+					<Button type='submit' disabled={isLoading}>
+						{isLoading ? "Signing up..." : "Sign up"}
+					</Button>
 				</form>
-
-				<div className='mt-8 flex gap-4 w-full'>
-					<Link to='/' className='w-full'>
-						<Button onClick={() => setIsAuthenticated(true)}>Sign up</Button>
-					</Link>
-				</div>
 				<div className='text-xs md:text-sm mt-4 flex justify-center gap-1 items-center'>
 					<p>Already have an account?</p>
 					<Link to='/login' className='font-bold'>

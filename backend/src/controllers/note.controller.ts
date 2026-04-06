@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import mongoose from "mongoose";
 import z from "zod";
 import Note from "../models/note.model.js";
 import {
@@ -6,10 +7,18 @@ import {
 	sendSuccessResponse,
 } from "../utils/response.utils.js";
 import { noteSchema, updateNoteSchema } from "../schemas/note.schema.js";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
 
-export const getNotes = async (req: Request, res: Response) => {
+export const getNotes = async (req: AuthRequest, res: Response) => {
 	try {
-		const notes = await Note.find();
+		const userId = req.user?.id;
+		if (!userId) {
+			return sendErrorResponse(res, 401, "Unauthorized");
+		}
+
+		const notes = await Note.find({
+			user: new mongoose.Types.ObjectId(userId),
+		});
 
 		sendSuccessResponse(res, 200, "Notes fetched successfully", notes);
 	} catch (error) {
@@ -17,11 +26,18 @@ export const getNotes = async (req: Request, res: Response) => {
 	}
 };
 
-export const getNote = async (req: Request, res: Response) => {
+export const getNote = async (req: AuthRequest, res: Response) => {
 	try {
 		const { id } = req.params;
+		const userId = req.user?.id;
+		if (!userId) {
+			return sendErrorResponse(res, 401, "Unauthorized");
+		}
 
-		const note = await Note.findById(id);
+		const note = await Note.findOne({
+			_id: id,
+			user: new mongoose.Types.ObjectId(userId),
+		});
 
 		if (!note) {
 			return sendErrorResponse(res, 404, "Note not found");
@@ -33,11 +49,17 @@ export const getNote = async (req: Request, res: Response) => {
 	}
 };
 
-export const createNote = async (req: Request, res: Response) => {
+export const createNote = async (req: AuthRequest, res: Response) => {
 	try {
 		const validatedData = noteSchema.parse(req.body);
+		const { user } = req;
+
+		if (!user?.id) {
+			return sendErrorResponse(res, 401, "Unauthorized");
+		}
 
 		const note = await Note.create({
+			user: new mongoose.Types.ObjectId(user.id),
 			...validatedData,
 			tag: validatedData.tag ?? "",
 			pinned: validatedData.pinned ?? false,
@@ -56,16 +78,24 @@ export const createNote = async (req: Request, res: Response) => {
 	}
 };
 
-export const updateNote = async (req: Request, res: Response) => {
+export const updateNote = async (req: AuthRequest, res: Response) => {
 	try {
 		const { id } = req.params;
+		const userId = req.user?.id;
+		if (!userId) {
+			return sendErrorResponse(res, 401, "Unauthorized");
+		}
 
 		const validatedData = updateNoteSchema.parse(req.body);
 
-		const note = await Note.findByIdAndUpdate(id, validatedData, {
-			returnDocument: "after",
-			runValidators: true,
-		});
+		const note = await Note.findOneAndUpdate(
+			{ _id: id, user: new mongoose.Types.ObjectId(userId) },
+			validatedData,
+			{
+				returnDocument: "after",
+				runValidators: true,
+			},
+		);
 
 		if (!note) {
 			return sendErrorResponse(res, 404, "Note not found");
@@ -84,11 +114,18 @@ export const updateNote = async (req: Request, res: Response) => {
 	}
 };
 
-export const deleteNote = async (req: Request, res: Response) => {
+export const deleteNote = async (req: AuthRequest, res: Response) => {
 	try {
 		const { id } = req.params;
+		const userId = req.user?.id;
+		if (!userId) {
+			return sendErrorResponse(res, 401, "Unauthorized");
+		}
 
-		const note = await Note.findByIdAndDelete(id);
+		const note = await Note.findOneAndDelete({
+			_id: id,
+			user: new mongoose.Types.ObjectId(userId),
+		});
 
 		if (!note) {
 			return sendErrorResponse(res, 404, "Note not found");

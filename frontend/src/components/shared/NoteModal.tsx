@@ -19,6 +19,7 @@ type FieldErrors = {
 };
 
 const emptyNote: Note = {
+	user: "",
 	title: "",
 	content: "",
 	tag: "",
@@ -150,7 +151,7 @@ const NoteModal = ({
 							onChange={handleChange}
 							placeholder='Enter note title...'
 							disabled={isLoading}
-							className={`w-full px-4 py-2 bg-white/20 border rounded-lg focus:outline-none transition-all duration-200 text-foreground placeholder-foreground/50 ${
+							className={`w-full px-4 py-2 bg-white/20 border rounded-lg focus:outline-none transition-all duration-200 text-foreground placeholder-foreground/50 text-sm ${
 								fieldErrors.title
 									? "border-red-500/60 focus:border-red-500 focus:bg-red-50/10"
 									: "border-foreground/30 focus:border-primary/60 focus:bg-white/30"
@@ -177,7 +178,7 @@ const NoteModal = ({
 							placeholder='Enter note content...'
 							disabled={isLoading}
 							rows={8}
-							className={`w-full px-4 py-2 bg-white/20 border rounded-lg focus:outline-none transition-all duration-200 text-foreground placeholder-foreground/50 resize-none ${
+							className={`w-full px-4 py-2 bg-white/20 border rounded-lg focus:outline-none transition-all duration-200 text-foreground placeholder-foreground/50 text-sm resize-none ${
 								fieldErrors.content
 									? "border-red-500/60 focus:border-red-500 focus:bg-red-50/10"
 									: "border-foreground/30 focus:border-primary/60 focus:bg-white/30"
@@ -202,7 +203,7 @@ const NoteModal = ({
 							onChange={handleChange}
 							placeholder='e.g., Personal, Work, Ideas...'
 							disabled={isLoading}
-							className={`w-full px-4 py-2 bg-white/20 border rounded-lg focus:outline-none transition-all duration-200 text-foreground placeholder-foreground/50 ${
+							className={`w-full px-4 py-2 bg-white/20 border rounded-lg focus:outline-none transition-all duration-200 text-foreground placeholder-foreground/50 text-sm ${
 								fieldErrors.tag
 									? "border-red-500/60 focus:border-red-500 focus:bg-red-50/10"
 									: "border-foreground/30 focus:border-primary/60 focus:bg-white/30"

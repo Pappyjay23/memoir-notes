@@ -1,9 +1,11 @@
 import { createNote, deleteNote, fetchNotes, updateNote } from "@/api/notes";
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { UserAuth } from "@/context/AuthContext";
 
 export type Note = {
 	_id: string;
+	user: string;
 	title: string;
 	content: string;
 	tag: string;
@@ -47,50 +49,73 @@ export const NoteContextProvider = ({
 
 	const handleCreateNote = async (data: Note) => {
 		try {
-			const response = await createNote(data);
-			setNotes((prevNotes) => sortNotes([...prevNotes, response.data]));
+			const note = await createNote(data);
+			setNotes((prevNotes) => sortNotes([...prevNotes, note]));
 		} catch {
 			toast.error("Failed to create note. Please try again.");
 		}
 	};
 
 	const handleUpdateNote = async (id: string, data: UpdateNoteData) => {
-		try {
-			const response = await updateNote(id, data);
-			setNotes((prevNotes) =>
-				sortNotes(
-					prevNotes.map((note) => (note._id === id ? response.data : note)),
+		const prevNotes = notes;
+		setNotes(
+			sortNotes(
+				prevNotes.map((n) =>
+					n._id === id
+						? { ...n, ...data, updatedAt: new Date().toISOString() }
+						: n,
 				),
+			),
+		);
+
+		try {
+			const updatedNote = await updateNote(id, data);
+			setNotes(
+				sortNotes(prevNotes.map((n) => (n._id === id ? updatedNote : n))),
 			);
 		} catch {
+			setNotes(prevNotes);
 			toast.error("Failed to update note. Please try again.");
 		}
 	};
 
 	const handleDeleteNote = async (id: string) => {
+		const prevNotes = notes;
+
+		setNotes(prevNotes.filter((n) => n._id !== id));
+
 		try {
 			await deleteNote(id);
-			setNotes((prevNotes) => prevNotes.filter((note) => note._id !== id));
 		} catch {
+			setNotes(prevNotes);
 			toast.error("Failed to delete note. Please try again.");
 		}
 	};
 
+	const { isAuthenticated, isLoading: authLoading } = UserAuth();
+
 	useEffect(() => {
+		if (authLoading || !isAuthenticated) {
+			if (!authLoading && !isAuthenticated) {
+				setNotes([]);
+			}
+			return;
+		}
+
 		const loadNotes = async () => {
 			try {
 				setIsNoteLoading(true);
-				const response = await fetchNotes();
-				setNotes(() => sortNotes(response.data));
-				setIsNoteLoading(false);
+				const notesData = await fetchNotes();
+				setNotes(() => sortNotes(notesData));
 			} catch {
 				toast.error("Failed to load notes. Please refresh the page.");
+			} finally {
 				setIsNoteLoading(false);
 			}
 		};
 
 		loadNotes();
-	}, []);
+	}, [authLoading, isAuthenticated]);
 
 	const values = {
 		notes,
