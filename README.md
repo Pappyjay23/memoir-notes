@@ -9,7 +9,8 @@
 
 ## Snapshot 📸
 
-_Add your own screenshot here (for example via GitHub Issues → drag image → copy URL) once you have a capture of the landing page or note dashboard._
+<img width="1920" height="1080" alt="Memoir Notes Visual (38)" src="https://github.com/user-attachments/assets/a17bf44a-6aec-45fa-bea0-99650b7133b5" />
+
 
 ## 🛠 Tech Stack
 
