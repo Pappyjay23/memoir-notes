@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 5001;
 
 const allowedOrigins = [
 	"http://localhost:5173",
-	process.env.CLIENT_URL, //TODO: Update this after deployment.
+	process.env.CLIENT_URL,
 ].filter(Boolean) as string[];
 
 app.use(
@@ -38,6 +38,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.get("/", (req, res) => {
+	res.json({ message: "API is running" });
+});
 app.use("/api/auth", authRouter);
 app.use("/api/user", userRouter);
 app.use("/api/notes", noteRouter);
