@@ -1,4 +1,4 @@
-import type { Response } from "express";
+import type { CookieOptions, Response } from "express";
 import z from "zod";
 import jwt from "jsonwebtoken";
 import User from "../models/user.model.js";
@@ -16,12 +16,15 @@ import {
 	getRefreshTokenExpiryMs,
 } from "../utils/token.utils.js";
 
-const getRefreshCookieOptions = () => ({
-	httpOnly: true as const,
-	secure: process.env.NODE_ENV === "production",
-	sameSite: "strict" as const,
-	maxAge: getRefreshTokenExpiryMs(),
-});
+const getRefreshCookieOptions = (): CookieOptions => {
+	const isProduction = process.env.NODE_ENV === "production";
+	return {
+		httpOnly: true,
+		secure: isProduction,
+		sameSite: isProduction ? "none" : "strict",
+		maxAge: getRefreshTokenExpiryMs(),
+	};
+};
 
 export const signup = async (req: AuthRequest, res: Response) => {
 	try {
