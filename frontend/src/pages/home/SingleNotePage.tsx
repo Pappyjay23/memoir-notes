@@ -85,7 +85,7 @@ const SingleNotePage = () => {
 
 	if (isLoading) {
 		return (
-			<div className='min-h-screen flex items-center justify-center bg-background'>
+			<div className='min-h-svh flex items-center justify-center bg-background'>
 				<div className='text-center'>
 					<div className='mb-4 inline-block'>
 						<div className='w-12 h-12 border-4 border-gray-300 border-t-black rounded-full animate-spin'></div>
@@ -97,7 +97,7 @@ const SingleNotePage = () => {
 
 	if (!note && !isLoading) {
 		return (
-			<div className='relative min-h-screen w-full flex justify-center items-center -mx-6 -my-10'>
+			<div className='relative min-h-svh w-full flex justify-center items-center -mx-6 -my-10'>
 				<div className='flex flex-col items-center gap-2 px-4 text-foreground'>
 					<p className='font-bold tracking-tight text-center text-2xl md:text-3xl'>
 						Note Not Found
@@ -118,7 +118,7 @@ const SingleNotePage = () => {
 
 	return (
 		<div className='flex flex-col relative w-full max-w-3xl mx-auto'>
-			<div className='group relative bg-primary border border-white/30 rounded-xl p-6 md:p-8 flex flex-col min-h-137.5 max-h-[85vh]'>
+			<div className='group relative bg-primary border border-white/30 rounded-xl p-6 md:p-8 flex flex-col min-h-137.5 max-h-[85svh]'>
 				<div className='flex flex-col justify-between items-start gap-4 mb-6'>
 					<div className='flex-1'>
 						<h1 className='text-xl md:text-3xl font-bold text-white tracking-tight leading-tight mb-5 md:mb-3'>

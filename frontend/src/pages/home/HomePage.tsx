@@ -88,7 +88,7 @@ const HomePage = () => {
 				</Button>
 			</div>
 
-			<div className='mt-8 flex items-center justify-center flex-wrap gap-4 max-h-[70vh] overflow-auto'>
+			<div className='mt-8 flex items-center justify-center flex-wrap gap-4 max-h-[70vh] overflow-auto pb-10'>
 				{isNoteLoading ? (
 					<>
 						{Array.from({ length: 6 }).map((_, index) => (

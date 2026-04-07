@@ -118,7 +118,7 @@ const NoteModal = ({
 			/>
 
 			<div
-				className={`fixed right-0 top-0 h-screen w-full max-w-md bg-background shadow-2xl z-50 transition-transform duration-500 ease-in-out transform ${
+				className={`fixed right-0 top-0 h-dvh w-full max-w-md bg-background shadow-2xl z-50 transition-transform duration-500 ease-in-out transform ${
 					isOpen ? "translate-x-0" : "translate-x-full"
 				}`}>
 				<div className='flex justify-between items-center px-6 py-4 border-b border-foreground/10'>

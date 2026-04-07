@@ -6,6 +6,7 @@ import { UserAuth } from "@/context/AuthContext";
 import Input from "@/components/ui/Input";
 import { signupSchema } from "@/schemas/authSchema";
 import type { SignupFormData } from "@/schemas/authSchema";
+import type { ZodIssue } from "zod/v3";
 
 type FieldErrors = {
 	firstName?: string;
@@ -50,7 +51,7 @@ const SignupPage = () => {
 		} catch (error: any) {
 			if (error.name === "ZodError") {
 				const errors: FieldErrors = {};
-				error.issues.forEach((err: any) => {
+				error.issues.forEach((err: ZodIssue) => {
 					const key = err.path[0] as keyof FieldErrors;
 					if (key) errors[key] = err.message;
 				});
@@ -64,7 +65,7 @@ const SignupPage = () => {
 	};
 
 	return (
-		<div className='min-h-screen flex flex-col justify-center items-center px-4'>
+		<div className='min-h-svh flex flex-col justify-center items-center px-4'>
 			<div className='max-w-lg mx-auto w-full'>
 				<div className='flex justify-center items-center gap-1 mb-4'>
 					<img src={Logo} alt='Logo' className='w-6 h-6' />

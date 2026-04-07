@@ -6,7 +6,7 @@ export const ErrorPage = () => {
 
 	return (
 		<section
-			className={`relative min-h-screen overflow-hidden w-full flex justify-center items-center`}>
+			className={`relative min-h-svh overflow-hidden w-full flex justify-center items-center`}>
 			<div className='flex flex-col items-center gap-2 px-4 relative z-3 text-foreground'>
 				<h1 className='text-[5rem] md:text-[7rem] font-extrabold -mt-3.75 md:-mt-7.5 flex items-center tracking-tighter'>
 					404
