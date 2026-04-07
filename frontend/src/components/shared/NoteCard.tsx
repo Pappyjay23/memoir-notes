@@ -2,26 +2,24 @@ import { useEffect, useRef, useState } from "react";
 import { AiOutlineDelete, AiOutlineEdit } from "react-icons/ai";
 import { IoEllipsisVerticalOutline } from "react-icons/io5";
 import { MdPushPin } from "react-icons/md";
-import DeleteConfirmModal from "./DeleteConfirmModal";
-import { UseNote, type Note } from "@/context/NoteContext";
+import { type Note } from "@/context/NoteContext";
 
 interface NoteCardProps {
 	note: Note;
 	onPin: (note: Note) => void;
 	handleEditModal: (note: Note) => void;
+	handleDeleteModal: (note: Note) => void;
 }
 
 const NoteCard = ({
 	note,
 	onPin,
 	handleEditModal,
+	handleDeleteModal,
 }: NoteCardProps) => {
 	const { title, content, tag, pinned, updatedAt } = note;
 	const [isMenuOpen, setIsMenuOpen] = useState(false);
-	const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
-
-	const {handleDeleteNote} =UseNote();
 
 	const date = new Date(updatedAt).toLocaleDateString("en-US", {
 		month: "long",
@@ -39,13 +37,8 @@ const NoteCard = ({
 	};
 
 	const handleDelete = () => {
-		setIsDeleteModalOpen(true);
+		handleDeleteModal(note);
 		setIsMenuOpen(false);
-	};
-
-	const handleConfirmDelete = () => {
-		handleDeleteNote(note._id);
-		setIsDeleteModalOpen(false);
 	};
 
 	useEffect(() => {
@@ -138,13 +131,6 @@ const NoteCard = ({
 
 				<span className='text-[11px] font-medium text-white'>{date}</span>
 			</div>
-
-			<DeleteConfirmModal
-				isOpen={isDeleteModalOpen}
-				title={title}
-				onConfirm={handleConfirmDelete}
-				onCancel={() => setIsDeleteModalOpen(false)}
-			/>
 		</div>
 	);
 };

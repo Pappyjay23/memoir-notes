@@ -1,3 +1,4 @@
+import DeleteConfirmModal from "@/components/shared/DeleteConfirmModal";
 import EmptyNote from "@/components/shared/EmptyNote";
 import NoteCard from "@/components/shared/NoteCard";
 import NoteModal from "@/components/shared/NoteModal";
@@ -13,8 +14,11 @@ const HomePage = () => {
 	const [searchQuery, setSearchQuery] = useState("");
 	const [isModalOpen, setIsModalOpen] = useState(false);
 	const [editingNote, setEditingNote] = useState<Note | undefined>();
+	const [notePendingDelete, setNotePendingDelete] = useState<Note | null>(
+		null,
+	);
 
-	const { notes, isNoteLoading, handleCreateNote, handleUpdateNote } =
+	const { notes, isNoteLoading, handleCreateNote, handleUpdateNote, handleDeleteNote } =
 		UseNote();
 
 	const filteredNotes = notes.filter((note) => {
@@ -49,6 +53,17 @@ const HomePage = () => {
 
 	const handlePin = (note: Note) => {
 		handleUpdateNote(note._id, { pinned: !note.pinned });
+	};
+
+	const handleDeleteModal = (note: Note) => {
+		setNotePendingDelete(note);
+	};
+
+	const handleConfirmDelete = () => {
+		if (notePendingDelete) {
+			handleDeleteNote(notePendingDelete._id);
+		}
+		setNotePendingDelete(null);
 	};
 
 	return (
@@ -91,6 +106,7 @@ const HomePage = () => {
 										key={note._id}
 										note={note}
 										handleEditModal={handleEditModal}
+										handleDeleteModal={handleDeleteModal}
 										onPin={handlePin}
 									/>
 								</Link>
@@ -113,6 +129,13 @@ const HomePage = () => {
 				onClose={() => setIsModalOpen(false)}
 				onSave={handleSave}
 				initialData={editingNote}
+			/>
+
+			<DeleteConfirmModal
+				isOpen={notePendingDelete !== null}
+				title={notePendingDelete?.title ?? ""}
+				onConfirm={handleConfirmDelete}
+				onCancel={() => setNotePendingDelete(null)}
 			/>
 		</div>
 	);
