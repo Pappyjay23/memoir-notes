@@ -31,6 +31,7 @@
 - [Node.js](https://nodejs.org/) – Runtime.
 - [Express](https://expressjs.com/) – REST API (`/api/auth`, `/api/user`, `/api/notes`).
 - [TypeScript](https://www.typescriptlang.org/) – Typed controllers and middleware.
+- [Swagger/OpenAPI 3.0](https://swagger.io/) – Interactive API documentation with [swagger-jsdoc](https://github.com/Surnet/swagger-jsdoc) and [swagger-ui-express](https://github.com/scottie1984/swagger-ui-express).
 - [MongoDB](https://www.mongodb.com/) + [Mongoose](https://mongoosejs.com/) – User and note persistence.
 - [JWT](https://jwt.io/) – Short-lived access tokens; refresh tokens stored server-side and in httpOnly cookies.
 - [bcrypt](https://github.com/kelektiv/node.bcrypt.js) – Password hashing.
@@ -46,6 +47,23 @@
 - **Rich note metadata** – Optional tags and pinned notes for organization.
 - **Protected experience** – Landing, login, and signup are public; the home grid and single-note views require auth.
 - **Rate limiting** – Auth routes are throttled to reduce brute-force and abuse (Upstash).
+
+## 📚 API Documentation
+
+Interactive API documentation is available via **Swagger UI** when the backend is running:
+
+- **Development**: [http://localhost:5001/api-docs](http://localhost:5001/api-docs)
+- **Production**: [https://memoir-notes-production.up.railway.app/api-docs](https://memoir-notes-production.up.railway.app/api-docs)
+
+The documentation includes:
+- Complete endpoint specifications (Auth, Users, Notes, Health)
+- Request/response schemas with examples
+- Interactive "Try it out" feature for testing endpoints
+- JWT authentication integration
+
+> **Tip**: Use the "Authorize" button in Swagger UI to add your access token and test protected endpoints.
+
+> **Note**: Access tokens expire after 15 minutes. Use `/api/auth/refresh` to get a new token or re-login.
 
 ## How to run locally 💻
 
