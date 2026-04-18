@@ -12,18 +12,27 @@ import { swaggerSpec, swaggerUiOptions } from "./config/swagger.config.js";
 import authRouter from "./routes/auth.routes.js";
 import noteRouter from "./routes/note.routes.js";
 import userRouter from "./routes/user.routes.js";
+import { originValidator } from "./middlewares/origin.middleware.js";
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5001;
 
-const allowedOrigins = [
-	"http://localhost:5173",
-	"http://localhost:5001",
-	process.env.CLIENT_URL,
-	process.env.SERVER_URL,
-].filter(Boolean) as string[];
+const devOrigins = ["http://localhost:5173", "http://localhost:5001"];
+
+const prodOrigins = [process.env.CLIENT_URL, process.env.SERVER_URL].filter(
+	Boolean,
+) as string[];
+
+if (process.env.NODE_ENV === "production" && prodOrigins.length === 0) {
+	console.error(
+		"WARNING: No CORS origins configured for production. Set CLIENT_URL or SERVER_URL.",
+	);
+}
+
+const allowedOrigins =
+	process.env.NODE_ENV === "production" ? prodOrigins : devOrigins;
 
 app.use(
 	cors({
@@ -42,11 +51,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
+app.use(originValidator(allowedOrigins));
+
+app.get("/", (_, res) => {
 	res.redirect("/api-docs");
 });
 
-app.get("/health", (req, res) => {
+app.get("/health", (_, res) => {
 	res.json({ status: "ok", message: "API is running" });
 });
 
