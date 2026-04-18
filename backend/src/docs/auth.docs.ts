@@ -219,7 +219,7 @@
  *         required: true
  *         schema:
  *           type: string
- *         description: httpOnly refresh token cookie. Sent automatically by the browser when `credentials: true` is enabled.
+ *         description: "httpOnly refresh token cookie. Sent automatically by the browser when `credentials: true` is enabled."
  *     responses:
  *       200:
  *         description: Token refreshed successfully (refresh token rotated and cookie updated)
@@ -228,7 +228,7 @@
  *             description: New httpOnly refresh token cookie
  *             schema:
  *               type: string
- *             example: refreshToken=eyJhbGciOi...; Path=/; HttpOnly
+ *             example: "refreshToken=eyJhbGciOi...; Path=/; HttpOnly"
  *         content:
  *           application/json:
  *             schema:

@@ -17,11 +17,13 @@ export const protectAuth = (
 	try {
 		const authHeader = req.headers.authorization;
 
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		const token = authHeader?.startsWith("Bearer ")
+			? (authHeader.split(" ")[1] ?? null)
+			: null;
+
+		if (!token) {
 			return sendErrorResponse(res, 401, "No token provided");
 		}
-
-		const token = authHeader.split(" ")[1]!;
 
 		const decoded = jwt.verify(
 			token,

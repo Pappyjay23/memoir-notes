@@ -9,7 +9,7 @@ const refreshTokenSchema = new Schema(
 			ref: "User",
 			required: true,
 		},
-		token: {
+		tokenHash: {
 			type: String,
 			required: true,
 			unique: true,

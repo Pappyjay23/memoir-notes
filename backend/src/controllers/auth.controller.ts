@@ -1,29 +1,39 @@
 import type { CookieOptions, Response } from "express";
-import z from "zod";
 import jwt from "jsonwebtoken";
-import User from "../models/user.model.js";
+import z from "zod";
+import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import RefreshToken from "../models/refreshToken.model.js";
+import User from "../models/user.model.js";
+import { loginSchema, signupSchema } from "../schemas/auth.schema.js";
 import {
 	sendErrorResponse,
 	sendSuccessResponse,
 } from "../utils/response.utils.js";
-import { signupSchema, loginSchema } from "../schemas/auth.schema.js";
-import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import {
 	generateAccessToken,
 	generateRefreshToken,
 	getRefreshTokenExpiry,
 	getRefreshTokenExpiryMs,
+	hashToken
 } from "../utils/token.utils.js";
 
-const getRefreshCookieOptions = (): CookieOptions => {
+const getBaseCookieOptions = (): CookieOptions => {
 	const isProduction = process.env.NODE_ENV === "production";
 	return {
 		httpOnly: true,
 		secure: isProduction,
 		sameSite: isProduction ? "none" : "strict",
-		maxAge: getRefreshTokenExpiryMs(),
 	};
+};
+
+const getRefreshCookieOptions = (): CookieOptions => ({
+	...getBaseCookieOptions(),
+	maxAge: getRefreshTokenExpiryMs(),
+});
+
+const clearOptions = (options: CookieOptions) => {
+	const { maxAge, ...rest } = options;
+	return rest;
 };
 
 export const signup = async (req: AuthRequest, res: Response) => {
@@ -43,7 +53,7 @@ export const signup = async (req: AuthRequest, res: Response) => {
 
 		await RefreshToken.create({
 			userId: user._id,
-			token: refreshToken,
+			tokenHash: hashToken(refreshToken),
 			expiresAt,
 		});
 
@@ -92,7 +102,7 @@ export const login = async (req: AuthRequest, res: Response) => {
 
 		await RefreshToken.create({
 			userId: user._id,
-			token: refreshToken,
+			tokenHash: hashToken(refreshToken),
 			expiresAt,
 		});
 
@@ -121,12 +131,10 @@ export const logout = async (req: AuthRequest, res: Response) => {
 		const refreshToken = req.cookies.refreshToken;
 
 		if (refreshToken) {
-			await RefreshToken.deleteOne({ token: refreshToken });
+			await RefreshToken.deleteOne({ tokenHash: hashToken(refreshToken) });
 		}
 
-		// Match cookie options used when setting the cookie so the browser reliably clears it
-		const { maxAge, ...clearOptions } = getRefreshCookieOptions();
-		res.clearCookie("refreshToken", clearOptions);
+		res.clearCookie("refreshToken", clearOptions(getRefreshCookieOptions()));
 
 		sendSuccessResponse(res, 200, "Logged out successfully");
 	} catch (error) {
@@ -135,6 +143,10 @@ export const logout = async (req: AuthRequest, res: Response) => {
 };
 
 export const refresh = async (req: AuthRequest, res: Response) => {
+	const clearRefreshCookie = () => {
+		res.clearCookie("refreshToken", clearOptions(getRefreshCookieOptions()));
+	};
+
 	try {
 		const refreshToken = req.cookies.refreshToken;
 
@@ -142,19 +154,19 @@ export const refresh = async (req: AuthRequest, res: Response) => {
 			return sendErrorResponse(res, 401, "Refresh token not provided");
 		}
 
-		const storedToken = await RefreshToken.findOne({ token: refreshToken });
+		const storedToken = await RefreshToken.findOne({
+			tokenHash: hashToken(refreshToken),
+		});
 
 		if (!storedToken) {
-			const { maxAge, ...clearOptions } = getRefreshCookieOptions();
-			res.clearCookie("refreshToken", clearOptions);
+			clearRefreshCookie();
 			return sendErrorResponse(res, 401, "Unauthorized");
 		}
 
 		// TTL cleanup can lag; enforce expiry at read time
 		if (storedToken.expiresAt.getTime() <= Date.now()) {
-			await RefreshToken.deleteOne({ token: refreshToken });
-			const { maxAge, ...clearOptions } = getRefreshCookieOptions();
-			res.clearCookie("refreshToken", clearOptions);
+			await RefreshToken.deleteOne({ tokenHash: hashToken(refreshToken) });
+			clearRefreshCookie();
 			return sendErrorResponse(res, 401, "Refresh token expired");
 		}
 
@@ -170,7 +182,7 @@ export const refresh = async (req: AuthRequest, res: Response) => {
 		}
 
 		// Delete old refresh token
-		await RefreshToken.deleteOne({ token: refreshToken });
+		await RefreshToken.deleteOne({ tokenHash: hashToken(refreshToken) });
 
 		// Generate new tokens
 		const newAccessToken = generateAccessToken(user._id.toString(), user.email);
@@ -180,7 +192,7 @@ export const refresh = async (req: AuthRequest, res: Response) => {
 		// Store new refresh token
 		await RefreshToken.create({
 			userId: user._id,
-			token: newRefreshToken,
+			tokenHash: hashToken(newRefreshToken),
 			expiresAt,
 		});
 
@@ -190,16 +202,16 @@ export const refresh = async (req: AuthRequest, res: Response) => {
 			accessToken: newAccessToken,
 		});
 	} catch (error) {
-		if (error instanceof jwt.TokenExpiredError) {
-			const { maxAge, ...clearOptions } = getRefreshCookieOptions();
-			res.clearCookie("refreshToken", clearOptions);
-			return sendErrorResponse(res, 401, "Refresh token expired");
-		}
-
-		if (error instanceof jwt.JsonWebTokenError) {
-			const { maxAge, ...clearOptions } = getRefreshCookieOptions();
-			res.clearCookie("refreshToken", clearOptions);
-			return sendErrorResponse(res, 401, "Invalid refresh token");
+		if (
+			error instanceof jwt.TokenExpiredError ||
+			error instanceof jwt.JsonWebTokenError
+		) {
+			clearRefreshCookie();
+			const message =
+				error instanceof jwt.TokenExpiredError
+					? "Refresh token expired"
+					: "Invalid refresh token";
+			return sendErrorResponse(res, 401, message);
 		}
 
 		sendErrorResponse(res, 500, "Error refreshing token");
