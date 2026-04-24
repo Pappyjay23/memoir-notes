@@ -1,17 +1,13 @@
-import { Navigate } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { UserAuth } from "@/context/AuthContext";
 import { LoadingState } from "@/components/LoadingState";
 
-type PrivateRouteProps = {
-	children: React.ReactNode;
-};
-
-export const PrivateRoute = ({ children }: PrivateRouteProps) => {
+export const PrivateRoute = () => {
 	const { isAuthenticated, isLoading } = UserAuth();
 
 	if (isLoading) {
 		return <LoadingState />;
 	}
 
-	return isAuthenticated ? <>{children}</> : <Navigate to='/landing' replace />;
+	return isAuthenticated ? <Outlet /> : <Navigate to='/landing' replace />;
 };
