@@ -4,32 +4,30 @@ import { PublicRoute } from "@/components/PublicRoute";
 import type { RouteConfig } from "@/routes";
 
 export const mapRoutes = (routes: RouteConfig[]) => {
-	return routes.map((route) => {
-		const { path, element, isPrivate } = route;
+	const privateRoutes = routes.filter((r) => r.isPrivate === true);
+	const publicRoutes = routes.filter((r) => r.isPrivate === false);
+	const errorRoutes = routes.filter((r) => r.isPrivate === undefined);
 
-		// Error route (no guard)
-		if (path === "*") {
-			return <Route key={path} path={path} element={element} />;
-		}
+	return (
+		<>
+			{/* Private routes */}
+			<Route element={<PrivateRoute />}>
+				{privateRoutes.map(({ path, element }) => (
+					<Route key={path} path={path} element={element} />
+				))}
+			</Route>
 
-		// Private route
-		if (isPrivate) {
-			return (
-				<Route
-					key={path}
-					path={path}
-					element={<PrivateRoute>{element}</PrivateRoute>}
-				/>
-			);
-		}
+			{/* Public routes */}
+			<Route element={<PublicRoute />}>
+				{publicRoutes.map(({ path, element }) => (
+					<Route key={path} path={path} element={element} />
+				))}
+			</Route>
 
-		// Public route (blocks authenticated users)
-		return (
-			<Route
-				key={path}
-				path={path}
-				element={<PublicRoute>{element}</PublicRoute>}
-			/>
-		);
-	});
+			{/* Error/unguarded routes */}
+			{errorRoutes.map(({ path, element }) => (
+				<Route key={path} path={path} element={element} />
+			))}
+		</>
+	);
 };
