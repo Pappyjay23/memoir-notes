@@ -142,10 +142,10 @@ export const AuthContextProvider = ({
 	const logout = async () => {
 		try {
 			await logoutAuth();
-		} catch {
+		} catch (error) {
 			// Even if logout fails, clear local state
+			console.log("Logout error", error);
 		} finally {
-			Cookies.remove("accessToken");
 			clearAuthState();
 			navigate("/login");
 		}
