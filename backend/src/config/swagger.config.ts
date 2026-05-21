@@ -1,7 +1,11 @@
+import { fileURLToPath } from "node:url";
 import path from "node:path";
 import swaggerJSDoc from "swagger-jsdoc";
 import type { SwaggerDefinition } from "swagger-jsdoc";
 import "dotenv/config";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const definition: SwaggerDefinition = {
 	openapi: "3.0.3",
@@ -268,8 +272,8 @@ const definition: SwaggerDefinition = {
 };
 
 const apis = [
-  path.resolve(process.cwd(), "src/docs/**/*.ts"),
-  path.resolve(process.cwd(), "dist/docs/**/*.js"),
+	path.join(__dirname, "../docs/**/*.js"),
+	path.join(__dirname, "../docs/**/*.ts"),
 ];
 
 export const swaggerSpec = swaggerJSDoc({
