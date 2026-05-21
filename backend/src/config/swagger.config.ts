@@ -267,7 +267,10 @@ const definition: SwaggerDefinition = {
 	},
 };
 
-const apis = [path.resolve(process.cwd(), "src/docs/**/*.ts")];
+const apis = [
+  path.resolve(process.cwd(), "src/docs/**/*.ts"),
+  path.resolve(process.cwd(), "dist/docs/**/*.js"),
+];
 
 export const swaggerSpec = swaggerJSDoc({
 	definition,
